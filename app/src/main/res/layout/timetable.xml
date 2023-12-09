@@ -9,6 +9,15 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+        <Spinner
+            android:id="@+id/spinner"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:layout_width="match_parent"
+            android:layout_height="50sp"
+            android:textAlignment="center">
+
+        </Spinner>
 
 
     </LinearLayout>
