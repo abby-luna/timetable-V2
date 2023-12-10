@@ -11,14 +11,13 @@ import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.coroutines.runBlocking
-import org.json.JSONArray
 import org.json.JSONObject
 import java.util.Calendar
 
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var json : JSONArray
+    private lateinit var json : JSONObject
     private var days = arrayOf("Mon", "Tue", "Wed","Thu","Fri")
     private fun viewGen(timeBegin : String, timeEnd : String, classTitle : String, roomNumber : String ) : LinearLayout
     {
@@ -43,10 +42,14 @@ class MainActivity : AppCompatActivity() {
 
     private fun generateJson()
     {
+
+        val dataGrab = GetData(this)
         runBlocking {
-            val dataGrab = GetData()
             val jsonStr = dataGrab.get()
-            json = JSONObject(jsonStr).getJSONArray("timetable")
+
+            json = JSONObject(jsonStr)
+
+            // json = jObj.getJSONArray("timetable")
         }
     }
 
@@ -61,11 +64,19 @@ class MainActivity : AppCompatActivity() {
 
         // TODO : remove old views
         clearScreen()
-
         val scrollWindow = findViewById<LinearLayout>(R.id.scrollableWindow)
-        for (i in 0..<json.length()) {
+
+        if(json.has("Error"))
+        {
+            val v  = layoutInflater.inflate(R.layout.timetable_error, null) as LinearLayout
+            scrollWindow.addView(v)
+            return
+        }
+        val jObj = json.getJSONArray("timetable")
+
+        for (i in 0..<jObj.length()) {
             try {
-                val objI = JSONObject(json[i].toString())
+                val objI = JSONObject(jObj[i].toString())
 
                 if(objI.getString("day") == days[day]) {
                     val timeButton: LinearLayout = viewGen(
