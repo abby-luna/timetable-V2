@@ -2,7 +2,6 @@ package com.tunafish.timetablev2
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -53,18 +52,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun clearScreen()
-    {
-        val parent : LinearLayout = findViewById(R.id.scrollableWindow)
-        parent.removeAllViews()
 
-    }
     private fun generateTimetable(day : Int)
     {
 
-        // TODO : remove old views
-        clearScreen()
         val scrollWindow = findViewById<LinearLayout>(R.id.scrollableWindow)
+        scrollWindow.removeAllViews()
 
         if(json.has("Error"))
         {
@@ -72,26 +65,17 @@ class MainActivity : AppCompatActivity() {
             scrollWindow.addView(v)
             return
         }
-        val jObj = json.getJSONArray("timetable")
 
-        for (i in 0..<jObj.length()) {
-            try {
-                val objI = JSONObject(jObj[i].toString())
-
-                if(objI.getString("day") == days[day]) {
-                    val timeButton: LinearLayout = viewGen(
-                        objI.getString("startTime"),
-                        objI.getString("endTime"),
-                        objI.getString("subject"),
-                        objI.getString("room")
-                    )
-                    scrollWindow.addView(timeButton)
-                }
-            } catch (e: Exception) {
-                Log.d("JSON E", e.toString())
-            }
+        try {
+            val jObj = json.getJSONArray("timetable")
+            val ttable : Timetable = Timetable()
+            ttable.genTimeTable(jObj)
+            ttable.traverse(scrollWindow, this, days[day])
         }
-
+        catch (e : Exception)
+        {
+            e.printStackTrace()
+        }
     }
     private fun generateSpinnerObject()
     {

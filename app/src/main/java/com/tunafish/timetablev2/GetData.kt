@@ -29,7 +29,7 @@ class GetData(c: Context)
         }
     }
 
-    private fun readFile() : String{
+    fun readFile() : String{
         try {
             var fileInputStream: FileInputStream? = context.openFileInput("timetable.json")
             var inputStreamReader = InputStreamReader(fileInputStream)
