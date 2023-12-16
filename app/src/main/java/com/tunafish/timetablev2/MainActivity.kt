@@ -19,6 +19,7 @@ import java.util.Calendar
 class MainActivity : AppCompatActivity() {
 
     private lateinit var json : JSONObject
+    var selectedPosition : Int? = null
     
     private fun generateJson()
     {
@@ -85,6 +86,7 @@ class MainActivity : AppCompatActivity() {
                 position: Int,
                 id: Long
             ) {
+                selectedPosition = position
                 generateTimetable(position)
                 //Log.d("Selected", position.toString())
             }
@@ -102,16 +104,18 @@ class MainActivity : AppCompatActivity() {
         // we need handler
         val handler = Handler(Looper.getMainLooper())
 
+        generateJson()
+        generateSpinnerObject()
+
         val r: Runnable = object : Runnable {
             override fun run() {
 
                 var lt = LocalTime.now()
-                generateJson()
-
-
                 var waitTime : Long = ((1800 - (((lt.minute % 30) * 60) + lt.second))  * 1000).toLong()
+//                selectedPosition = position
+                selectedPosition?.let { generateTimetable(it) }
+
                 handler.postDelayed(this, waitTime )
-                generateSpinnerObject()
                 Log.d("Handler", "${LocalTime.now()}");
             }
         }
