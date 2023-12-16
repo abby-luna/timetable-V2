@@ -1,54 +1,32 @@
 package com.tunafish.timetablev2
 
-import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.LinearLayout
 import android.widget.Spinner
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.coroutines.runBlocking
 import org.json.JSONObject
+import java.time.LocalTime
 import java.util.Calendar
 
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var json : JSONObject
-    private var days = arrayOf("Mon", "Tue", "Wed","Thu","Fri")
-    private fun viewGen(timeBegin : String, timeEnd : String, classTitle : String, roomNumber : String ) : LinearLayout
-    {
-        val view  = layoutInflater.inflate(R.layout.timetable_cell, null) as LinearLayout
-
-        view.setOnClickListener {
-            val i = Intent(this, LoginPage::class.java)
-            startActivity(i)
-        }
-
-        val classView = view.findViewById<TextView>(R.id.className)
-        val timeView = view.findViewById<TextView>(R.id.timeFull)
-        val roomView = view.findViewById<TextView>(R.id.roomNo)
-
-        classView.text = classTitle
-        timeView.text = "$timeBegin - $timeEnd"
-        roomView.text = roomNumber
-
-
-        return view;
-    }
-
+    
     private fun generateJson()
     {
 
         val dataGrab = GetData(this)
         runBlocking {
             val jsonStr = dataGrab.get()
-
             json = JSONObject(jsonStr)
-
-            // json = jObj.getJSONArray("timetable")
         }
     }
 
@@ -69,8 +47,11 @@ class MainActivity : AppCompatActivity() {
         try {
             val jObj = json.getJSONArray("timetable")
             val ttable : Timetable = Timetable()
+            val calendar: Calendar = Calendar.getInstance()
+            val today = calendar.get(Calendar.DAY_OF_WEEK)
+
             ttable.genTimeTable(jObj)
-            ttable.traverse(scrollWindow, this, days[day])
+            ttable.traverse(scrollWindow, this, day, today-2)
         }
         catch (e : Exception)
         {
@@ -117,9 +98,25 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.timetable)
 
-        generateJson()
-        generateSpinnerObject()
-        //generateTimetable()
+
+        // we need handler
+        val handler = Handler(Looper.getMainLooper())
+
+        val r: Runnable = object : Runnable {
+            override fun run() {
+
+                var lt = LocalTime.now()
+                generateJson()
+
+
+                var waitTime : Long = ((1800 - (((lt.minute % 30) * 60) + lt.second))  * 1000).toLong()
+                handler.postDelayed(this, waitTime )
+                generateSpinnerObject()
+                Log.d("Handler", "${LocalTime.now()}");
+            }
+        }
+        r.run()
+
 
     }
 }

@@ -12,15 +12,15 @@ import java.util.Calendar
 class Timetable
 {
 
-    var cells : MutableList<TimetableCell> = mutableListOf()
-    var size = 0
-    fun traverse(v: LinearLayout, c: Context, d: String) {
+    private var cells : MutableList<TimetableCell> = mutableListOf()
+    private var size = 0
+    fun traverse(v: LinearLayout, c: Context, d: Int, today: Int) {
 
         val s = cells.sortedBy { it.startTime }
 
         for (i in 0..<size) {
             if(s[i].checkDay(d))
-                v.addView(s[i].makeLayout(c))
+                v.addView(s[i].makeLayout(c, today))
         }
     }
     fun insert(t: TimetableCell)
